@@ -94,6 +94,12 @@ var statuses = {
     "Campaign Created": {
         label: "label-success",
         icon: "fa-rocket"
+    },
+    "Script executed": {
+        color: "#f05b4f",
+        label: "label-danger",
+        icon: "fa-exclamation",
+        point: "ct-point-clicked"
     }
 }
 
@@ -148,7 +154,7 @@ function deleteCampaign() {
             })
         }
     }).then(function (result) {
-        if(result.value){
+        if (result.value) {
             Swal.fire(
                 'Campaign Deleted!',
                 'This campaign has been deleted!',
@@ -186,7 +192,7 @@ function completeCampaign() {
             })
         }
     }).then(function (result) {
-        if (result.value){
+        if (result.value) {
             Swal.fire(
                 'Campaign Completed!',
                 'This campaign has been completed!',
@@ -275,7 +281,7 @@ function replay(event_idx) {
             });
         }
     }).then(function (result) {
-        if (result.value){
+        if (result.value) {
             url = result.value
             submitForm()
         }
@@ -381,7 +387,7 @@ function renderTimeline(data) {
         '<br>Result ID: ' + escapeHtml(record.id) + '</span>' +
         '<div class="timeline-graph col-sm-6">'
     $.each(campaign.timeline, function (i, event) {
-        if (!event.email || event.email == record.email) {
+        if (!event.email || event.email.toLowerCase == record.email.toLowerCase) {
             // Add the event
             results += '<div class="timeline-entry">' +
                 '    <div class="timeline-bar"></div>'
@@ -527,13 +533,13 @@ var renderPieChart = function (chartopts) {
                         left = chart.plotLeft + pie.center[0],
                         top = chart.plotTop + pie.center[1];
                     this.innerText = rend.text(chartopts['data'][0].count, left, top).
-                    attr({
-                        'text-anchor': 'middle',
-                        'font-size': '24px',
-                        'font-weight': 'bold',
-                        'fill': chartopts['colors'][0],
-                        'font-family': 'Helvetica,Arial,sans-serif'
-                    }).add();
+                        attr({
+                            'text-anchor': 'middle',
+                            'font-size': '24px',
+                            'font-weight': 'bold',
+                            'fill': chartopts['colors'][0],
+                            'font-family': 'Helvetica,Arial,sans-serif'
+                        }).add();
                 },
                 render: function () {
                     this.innerText.attr({
@@ -757,34 +763,34 @@ function load() {
                         [2, "asc"]
                     ],
                     columnDefs: [{
-                            orderable: false,
-                            targets: "no-sort"
-                        }, {
-                            className: "details-control",
-                            "targets": [1]
-                        }, {
-                            "visible": false,
-                            "targets": [0, 8]
+                        orderable: false,
+                        targets: "no-sort"
+                    }, {
+                        className: "details-control",
+                        "targets": [1]
+                    }, {
+                        "visible": false,
+                        "targets": [0, 8]
+                    },
+                    {
+                        "render": function (data, type, row) {
+                            return createStatusLabel(data, row[8])
                         },
-                        {
-                            "render": function (data, type, row) {
-                                return createStatusLabel(data, row[8])
-                            },
-                            "targets": [6]
-                        },
-                        {
-                            className: "text-center",
-                            "render": function (reported, type, row) {
-                                if (type == "display") {
-                                    if (reported) {
-                                        return "<i class='fa fa-check-circle text-center text-success'></i>"
-                                    }
-                                    return "<i role='button' class='fa fa-times-circle text-center text-muted' onclick='report_mail(\"" + row[0] + "\", \"" + campaign.id + "\");'></i>"
+                        "targets": [6]
+                    },
+                    {
+                        className: "text-center",
+                        "render": function (reported, type, row) {
+                            if (type == "display") {
+                                if (reported) {
+                                    return "<i class='fa fa-check-circle text-center text-success'></i>"
                                 }
-                                return reported
-                            },
-                            "targets": [7]
-                        }
+                                return "<i role='button' class='fa fa-times-circle text-center text-muted' onclick='report_mail(\"" + row[0] + "\", \"" + campaign.id + "\");'></i>"
+                            }
+                            return reported
+                        },
+                        "targets": [7]
+                    }
                     ]
                 });
                 resultsTable.clear();
@@ -931,30 +937,30 @@ function report_mail(rid, cid) {
         allowOutsideClick: false,
         showLoaderOnConfirm: true
     }).then(function (result) {
-        if (result.value){
-            api.campaignId.get(cid).success((function(c) {
+        if (result.value) {
+            api.campaignId.get(cid).success((function (c) {
                 report_url = new URL(c.url)
                 report_url.pathname = '/report'
-                report_url.search = "?rid=" + rid 
+                report_url.search = "?rid=" + rid
                 fetch(report_url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    refresh();
-                })
-                .catch(error => {
-                    let errorMessage = error.message;
-                    if (error.message === "Failed to fetch") {
-                        errorMessage = "This might be due to Mixed Content issues or network problems.";
-                    }
-                    Swal.fire({
-                        title: 'Error',
-                        text: errorMessage,
-                        type: 'error',
-                        confirmButtonText: 'Close'
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        refresh();
+                    })
+                    .catch(error => {
+                        let errorMessage = error.message;
+                        if (error.message === "Failed to fetch") {
+                            errorMessage = "This might be due to Mixed Content issues or network problems.";
+                        }
+                        Swal.fire({
+                            title: 'Error',
+                            text: errorMessage,
+                            type: 'error',
+                            confirmButtonText: 'Close'
+                        });
                     });
-                });
             }));
         }
     })
