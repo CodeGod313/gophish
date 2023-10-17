@@ -80,6 +80,21 @@ func (as *Server) Campaign(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		JSONResponse(w, models.Response{Success: true, Message: "Campaign deleted successfully!"}, http.StatusOK)
+	// HTTP Method PATCH is used ONLY for adding events to the specified campaign
+	case r.Method == "PATCH":
+		e := models.Event{}
+		err := json.NewDecoder(r.Body).Decode(&e)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid JSON structure"}, http.StatusBadRequest)
+			return
+		}
+		err = models.AddEvent(&e, id)
+		if err != nil {
+			log.Error(err)
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid JSON structure"}, http.StatusBadRequest)
+			return
+		}
+		JSONResponse(w, models.Response{Success: true, Message: "Event successfully added"}, http.StatusAccepted)
 	}
 }
 
